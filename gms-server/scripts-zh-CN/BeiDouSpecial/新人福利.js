@@ -33,8 +33,8 @@ function action(mode, type, selection)
 			else
 			{
 				// 生成随机数量
-				mesoQty = Math.floor(Math.random() * 501) + 500;     // 金币随机50-100万（可以根据需要调整）
-				cashQty = Math.floor(Math.random() * 101) + 100;  // 点券随机100-200
+				mesoQty = 999999;  // 金币
+				cashQty = 30000;  // 点券
 
 				cm.sendAcceptDecline("您确定要领取新手礼包吗？一个角色#r限领一次。#k\n\n\r\n"
 					+ "获得奖励：\n"
@@ -48,16 +48,16 @@ function action(mode, type, selection)
 			cm.saveOrUpdateCharacterExtendValue("新人福利礼包", "已领取");
 
 			// 给金币（注意：这里mesoQty是万为单位，所以需要乘以10000）
-			cm.gainMeso(mesoQty * 10000);
+			cm.gainMeso(mesoQty);
 
 			// 给点券
-			cm.getPlayer().getCashShop().gainCash(1, cashQty *10000);
+			cm.getPlayer().getCashShop().gainCash(1, cashQty);
 
 			cm.sendOk("恭喜您获得：\n"
-				+ "#b" + mesoQty + "#k 万金币\n"
-				+ "#b" + cashQty + "#k 万点券\n\n"
+				+ "#b" + mesoQty + "#k 金币\n"
+				+ "#b" + cashQty + "#k 点券\n\n"
 				+ "祝您游戏愉快！");
-			cm.dropMessage(5,"【新人福利】玩家 [" + cm.getPlayer() + "] 加入游戏领取开荒金币"+mesoQty+"万＋点券"+cashQty+"万！");
+			cm.dropMessage(5,"【新人福利】玩家 [" + cm.getPlayer() + "] 加入游戏领取开荒金币"+mesoQty+"＋点券"+cashQty+"！");
 			cm.dispose();
 		}
 		else
