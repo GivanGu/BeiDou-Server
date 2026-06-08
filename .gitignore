@@ -33,3 +33,8 @@ database/docker-pg-db-data
 main/resources/static/
 src/main/resources/static/
 .claude/settings.local.json
+
+
+# docker 产生的文件
+docker-db-data
+beidou-server-nightly

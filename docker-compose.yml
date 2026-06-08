@@ -1,0 +1,89 @@
+services:
+  beidou-server:
+    image: beidou-server:my-nightly
+    build:
+      context: .
+      dockerfile: ./docker/backend-local.Dockerfile
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      # Web 由nginx路由
+      # - "8686:8686" 
+      # Login server
+      - "8484:8484"
+      # Channels.
+      - "7575-7577:7575-7577"
+    # 注意 命令行参数的优先级高于 application.yml 配置文件
+    volumes:
+      - ./beidou-server-nightly:/opt/server
+    command:
+      - --mybatis-flex.datasource.mysql.url=jdbc:mysql://beidou-db:3306/beidou?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      - --mybatis-flex.datasource.mysql.username=root
+      - --mybatis-flex.datasource.mysql.password=c1234568
+      - --gms.service.wan-host=192.168.31.4
+      - --gms.service.lan-host=192.168.31.4
+      - --gms.service.localhost=192.168.31.4
+      #  如果前端访问失败，可以尝试修改↓
+      # - --app.vue=beidou-ui:8686
+      #  !!! 生产环境务必自行生成密钥(可以使用以下指令来生成) , 并关闭 swagger !!!
+      #  powershell:  -join ((1..10) | ForEach { '{0:x2}' -f (Get-Random -Maximum 256) })
+      #  bash      :  openssl rand -hex 10
+      # - --jwt.secret=4a256297-616b-7786-652f-fd3988c39bb7
+      # - --springdoc.api-docs.enabled=true
+      # - --springdoc.swagger-ui.enabled=true
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -tunlp | grep 0.0.0.0:8484 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      beidou-db:
+        condition: service_healthy
+    networks:
+      - beidou-network
+
+  beidou-ui:
+    image: beidou-ui:my-nightly
+    build:
+      context: .
+      dockerfile: ./docker/frontend-local.Dockerfile
+    volumes:
+      - ./docker/nginx-ui.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      # Web
+      - "22700:8686"
+    depends_on:
+      - beidou-server
+    networks:
+      - beidou-network
+      
+  beidou-db:
+    container_name: beidou-db
+    image: mysql:8.4.0
+    environment:
+      # mysql root 密码
+      MYSQL_ROOT_PASSWORD: "c1234568"
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - ./docker-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pc1234568"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - beidou-network
+
+  adminer:
+    image: adminer:5.4.1-standalone
+    container_name: beidou-db-adminer
+    ports:
+      - 22701:8080
+    networks:
+      - beidou-network
+
+networks:
+  beidou-network:
+    driver: bridge
