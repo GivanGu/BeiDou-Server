@@ -85,6 +85,10 @@ export default {
   'account.player.jobName': 'Job Name',
   'account.player.level': 'Lv.',
   'account.player.gm.level': 'GM Lv.',
+  'account.player.accountName': 'Account',
+  'account.player.loginIp': 'Login IP',
+  'account.player.hwid': 'HWID',
+  'account.player.meso': 'Meso',
 
   'account.player.button.globalGive': 'Global Give',
   'account.player.button.give': 'Give',
