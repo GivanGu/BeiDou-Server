@@ -36,5 +36,5 @@ src/main/resources/static/
 
 
 # docker 产生的文件
-docker-db-data
-beidou-server-nightly
+docker-db-data/
+beidou-server-nightly/
