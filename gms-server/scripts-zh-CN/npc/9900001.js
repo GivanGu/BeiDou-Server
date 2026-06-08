@@ -23,7 +23,7 @@
 /**
  * @description 拍卖行中心脚本
  */
-var OldTitle ="\t\t\t\t\t#e欢迎来到#rBeiDou#k脚本中心#n\t\t\t\t\r\n";
+var OldTitle ="\t\t\t\t\t#e欢迎来到#r怀旧岛#k脚本中心#n\t\t\t\t\r\n";
 var status = -1;
 var i = 0;
 function start() {
@@ -45,18 +45,18 @@ function action(mode, type, selection) {
         text += "当前点券：" + cm.getPlayer().getCashShop().getCash(1) + "\r\n";
         text += "当前抵用券：" + cm.getPlayer().getCashShop().getCash(2) + "\r\n";
         text += "当前信用券：" + cm.getPlayer().getCashShop().getCash(4) + "\r\n";
-		text += "当前金币：" + cm.getPlayer().getMeso() + "\r\n";
         text += " \r\n\r\n";
-		text += "#L3#传送自由#l \t #L69#快速转职#l \t #L70#学习技能#l\r\n";
-		text += "#L71#超级传送#l \t #L4#爆率一览#l \t #L2#在线奖励#l\r\n";
-        text += "#L0#新人福利#l \t #L1#每日签到#l  \t #L72#转世重生#l\r\n";
-		// text += "#L999#测试脚本>>>未上线#l \t \r\n";
+        text += "#L0#新人福利#l \t #L1#每日签到#l \t #L2#在线奖励#l\r\n";
+        text += "#L3#传送自由#l \t #L4#爆率一览#l \t #L5#万能传送#l\r\n";
+        text += "#L6#快速出售#l \t #L7#任务之星#l \r\n";
         if (cm.getPlayer().isGM()) {
             text += "\r\n\r\n";
             text += "\t\t\t\t#r=====以下内容仅GM可见=====\r\n";
+            text += "#L51#快速售卖#l \r\n\r\n";
             text += "#L61#超级传送#l \t #L62#超级商店#l \t #L63#整容集合#l\r\n\r\n";
 			text += "#L64#UI查询#l \t #L65#一键删除道具#l \t #L66#一键刷道具#l\r\n\r\n";
-			text += "#L67#有状态脚本示例#l \t #L68#NextLevel脚本示例#l";
+            text += "#L67#任务排行榜#l \t #L68#NextLevel脚本示例#l";
+
         }
         cm.sendSimple(text);
     } else if (status === 1) {
@@ -69,21 +69,6 @@ function action(mode, type, selection) {
 function doSelect(selection) {
     switch (selection) {
         // 非GM功能
-		case 999:
-            openNpc("测试脚本");
-            break;
-        case 69:
-            openNpc("快速转职");
-            break;
-        case 70:
-            openNpc("技能学习");
-            break;
-        case 71:
-            openNpc("万能传送");
-            break;
-        case 72:
-            openNpc("转世重生");
-            break;
         case 0:
             openNpc("新人福利");
             break;
@@ -92,6 +77,7 @@ function doSelect(selection) {
             break;
         case 2:
             openNpc("在线奖励_nextlevel");
+            // openNpc("在线奖励");
             break;
         case 3:
             cm.getPlayer().saveLocation("FREE_MARKET");
@@ -100,7 +86,21 @@ function doSelect(selection) {
         case 4:
             openNpc("当前地图掉落");
             break;
+        case 5:
+            openNpc("万能传送");
+            break;
+        case 6: // 快速出售
+            cm.dispose();
+            cm.openNpc(9000041);
+            break; 
+        case 7: // 任务之星
+            openNpc("Example1")
+            break;
         // GM功能
+        case 51:
+            cm.dispose();
+            cm.openNpc(9000041);
+            break;
         case 61:
             openNpc("万能传送");
             break;
@@ -126,9 +126,9 @@ function doSelect(selection) {
             break;
         case 68:
             openNpc("Example2")
+            // cm.dispose();
+            // cm.openNpc(9010001);
             break;
-
-
         default:
             cm.sendOk("该功能暂不支持，敬请期待！");
             cm.dispose();
