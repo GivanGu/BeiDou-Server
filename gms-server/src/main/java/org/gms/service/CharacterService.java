@@ -104,15 +104,23 @@ public class CharacterService {
                 .filter(chr -> (Objects.isNull(request.getId()) || Objects.equals(chr.getId(), request.getId()))
                         && (RequireUtil.isEmpty(request.getName()) || chr.getName().contains(request.getName()))
                         && (Objects.isNull(request.getMap()) || Objects.equals(chr.getMap().getId(), request.getMap())))
-                .page(chr -> ChrOnlineListRtnDTO.builder()
-                        .id(chr.getId())
-                        .name(chr.getName())
-                        .map(chr.getMap().getId())
-                        .job(chr.getJob().getId())
-                        .jobName(chr.getJob().getName())
-                        .level(chr.getLevel())
-                        .gm(chr.gmLevel())
-                        .build());
+                .page(chr -> {
+                    Client client = chr.getClient();
+                    return ChrOnlineListRtnDTO.builder()
+                            .id(chr.getId())
+                            .accountName(client != null ? client.getAccountName() : null)
+                            .name(chr.getName())
+                            .loginIp(client != null ? client.getRemoteAddress() : null)
+                            .hwid(client != null && client.getHwid() != null 
+                                    ? client.getHwid().hwid() : null)
+                            .map(chr.getMap().getId())
+                            .job(chr.getJob().getId())
+                            .jobName(chr.getJob().getName())
+                            .level(chr.getLevel())
+                            .gm(chr.gmLevel())
+                            .meso(chr.getMeso())
+                            .build();
+                });
     }
 
     public void updateRate(ExtendValueDO data) {

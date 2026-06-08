@@ -70,6 +70,33 @@
       >
         <template #columns>
           <a-table-column
+            :title="$t('account.player.accountName')"
+            data-index="accountName"
+            :width="120"
+            align="center"
+          />
+          <!-- 登录IP -->
+          <a-table-column
+            :title="$t('account.player.loginIp')"
+            data-index="loginIp"
+            :width="140"
+            align="center"
+          />
+          <!-- HWID -->
+          <a-table-column
+            :title="$t('account.player.hwid')"
+            data-index="hwid"
+            :width="160"
+            align="center"
+          />
+          <!-- 金币 -->
+          <a-table-column
+            :title="$t('account.player.meso')"
+            data-index="meso"
+            :width="120"
+            align="center"
+          />
+          <a-table-column
             :title="$t('account.player.id')"
             data-index="id"
             :width="80"

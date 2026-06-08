@@ -17,5 +17,8 @@ public class ChrOnlineListRtnDTO {
     private String jobName;
     private int level;
     private int gm;
-
+    private String accountName;   // 账户名
+    private String loginIp;       // 登录IP
+    private String hwid;          // 硬件ID
+    private long meso;            // 金币
 }
