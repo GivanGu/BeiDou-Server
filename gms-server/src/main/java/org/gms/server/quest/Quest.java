@@ -69,6 +69,7 @@ import org.gms.server.quest.requirements.QuestRequirement;
 import org.gms.server.quest.requirements.ScriptRequirement;
 import org.gms.util.PacketCreator;
 import org.gms.util.StringUtil;
+import org.gms.util.Randomizer;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -415,6 +416,21 @@ public class Quest {
         newStatus.setCompleted(chr.getQuest(this).getCompleted());
         newStatus.setCompletionTime(System.currentTimeMillis());
         chr.updateQuestStatus(newStatus);
+
+        if (GameConfig.getServerBoolean("quest_complete_hp_bonus")) {
+            boolean isFirstCompletion = chr.getQuest(this).getCompleted() <= 0;
+            if (!this.repeatable || isFirstCompletion) {
+                int hpBonus = Randomizer.rand(3, 10);
+                chr.addMaxHP(hpBonus);
+                chr.addHP(hpBonus);
+    
+                String questName = this.name != null && !this.name.isEmpty()
+                        ? this.name
+                        : String.valueOf(this.id);
+                chr.sendPacket(PacketCreator.earnTitleMessage(
+                        "任务 [" + questName + "] 为您增加了" + hpBonus + "点MaxHp"));
+            }
+        }
 
         chr.sendPacket(PacketCreator.showSpecialEffect(9)); // Quest completion
         chr.getMap().broadcastMessage(chr, PacketCreator.showForeignEffect(chr.getId(), 9), false); //use 9 instead of 12 for both

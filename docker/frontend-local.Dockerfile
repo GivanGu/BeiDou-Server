@@ -9,7 +9,7 @@ WORKDIR /opt/ui
 COPY ./gms-ui/package.json ./
 COPY ./gms-ui/yarn.lock ./
  
-RUN yarn global add yarn@v1.22.10 && \
+RUN --mount=type=cache,target=/root/.cache yarn global add yarn@v1.22.10 && \
     yarn install --frozen-lockfile --ignore-scripts && \
     PLATFORM=$(node -p "process.platform + '-' + process.arch") && \
     mkdir -p node_modules/optipng-bin/vendor/$PLATFORM && \

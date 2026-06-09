@@ -7,11 +7,13 @@ WORKDIR /opt/build
 COPY ./pom.xml                 ./pom.xml
 COPY ./gms-server/pom.xml      ./gms-server/pom.xml
  
-RUN mvn dependency:resolve -B --no-transfer-progress
+# RUN mvn dependency:resolve -B --no-transfer-progress
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:resolve -B --no-transfer-progress
  
 COPY ./gms-server/src          ./gms-server/src
  
-RUN mvn package -B -DskipTests --no-transfer-progress
+# RUN mvn package -B -DskipTests --no-transfer-progress
+RUN --mount=type=cache,target=/root/.m2 mvn package -B -DskipTests --no-transfer-progress
  
 RUN mkdir result && mv ./gms-server/target/BeiDou.jar ./result/BeiDou.jar
  
