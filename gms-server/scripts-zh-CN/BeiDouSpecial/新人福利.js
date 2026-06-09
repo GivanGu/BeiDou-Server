@@ -38,8 +38,8 @@ function action(mode, type, selection)
 
 				cm.sendAcceptDecline("您确定要领取新手礼包吗？一个角色#r限领一次。#k\n\n\r\n"
 					+ "获得奖励：\n"
-					+ "#b" + mesoQty + "#k 万金币\n"
-					+ "#b" + cashQty + "#k 万点券");
+					+ "#b" + mesoQty + "#k 金币\n"
+					+ "#b" + cashQty + "#k 点券");
 			}
 		}
 		else if (status == 1 )
