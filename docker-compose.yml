@@ -80,7 +80,7 @@ services:
     image: adminer:5.4.1-standalone
     container_name: beidou-db-adminer
     ports:
-      - 22701:8080
+      - 22802:8080
     networks:
       - beidou-network
 

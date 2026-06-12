@@ -33,6 +33,6 @@ RUN chmod +x /entrypoint-nightly.sh
  
 VOLUME /opt/server
  
-EXPOSE 8686 8484 7575 7576 7577
- 
+EXPOSE 8686 22800 22811-22820
+
 ENTRYPOINT ["/entrypoint-nightly.sh"]
