@@ -10,9 +10,9 @@ services:
       # Web 由nginx路由
       # - "8686:8686" 
       # Login server
-      - "8484:8484"
+      - "22800:22800"
       # Channels.
-      - "7575-7577:7575-7577"
+      - "22811-22820:22811-22820"
     # 注意 命令行参数的优先级高于 application.yml 配置文件
     volumes:
       - ./beidou-server-nightly:/opt/server
@@ -32,7 +32,7 @@ services:
       # - --springdoc.api-docs.enabled=true
       # - --springdoc.swagger-ui.enabled=true
     healthcheck:
-      test: ["CMD", "sh", "-c", "netstat -tunlp | grep 0.0.0.0:8484 || exit 1"]
+      test: ["CMD", "sh", "-c", "netstat -tunlp | grep 0.0.0.0:22800 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -51,7 +51,7 @@ services:
       - ./docker/nginx-ui.conf:/etc/nginx/conf.d/default.conf
     ports:
       # Web
-      - "22700:8686"
+      - "22801:8686"
     depends_on:
       - beidou-server
     networks:
@@ -87,3 +87,4 @@ services:
 networks:
   beidou-network:
     driver: bridge
+    
