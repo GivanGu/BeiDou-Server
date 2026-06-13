@@ -420,7 +420,12 @@ public class Quest {
         if (GameConfig.getServerBoolean("quest_complete_hp_bonus")) {
             boolean isFirstCompletion = chr.getQuest(this).getCompleted() <= 0;
             if (!this.repeatable || isFirstCompletion) {
-                int hpBonus = Randomizer.rand(3, 10);
+                int minHpBonus = GameConfig.getServerInt("quest_complete_hp_bonus_min");
+                int maxHpBonus = GameConfig.getServerInt("quest_complete_hp_bonus_max");
+                if (minHpBonus <= 0) minHpBonus = 3;
+                if (maxHpBonus <= 0) maxHpBonus = 10;
+                if (maxHpBonus < minHpBonus) maxHpBonus = minHpBonus;
+                int hpBonus = Randomizer.rand(minHpBonus, maxHpBonus);
                 chr.addMaxHP(hpBonus);
                 chr.addHP(hpBonus);
     
