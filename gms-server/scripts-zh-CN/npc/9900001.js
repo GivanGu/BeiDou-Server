@@ -48,7 +48,8 @@ function action(mode, type, selection) {
         text += " \r\n\r\n";
         text += "#L0#新人福利#l \t #L1#每日签到#l \t #L2#在线奖励#l\r\n";
         text += "#L3#传送自由#l \t #L4#爆率一览#l \t #L5#万能传送#l\r\n";
-        text += "#L6#快速出售#l \t #L7#任务之星#l \r\n";
+        text += "#L6#快速出售#l \t #L7#任务之星#l \t #L8#学二段跳#l\r\n";
+        // text += "#L9#勋章制作#l \r\n";
         if (cm.getPlayer().isGM()) {
             text += "\r\n\r\n";
             text += "\t\t\t\t#r=====以下内容仅GM可见=====\r\n";
@@ -95,6 +96,12 @@ function doSelect(selection) {
             break; 
         case 7: // 任务之星
             openNpc("Example1")
+            break;
+        case 8: // 学二段跳
+            openNpc("技能学习");
+            break;
+        case 9: // 血勋章
+            openNpc("血勋章");
             break;
         // GM功能
         case 51:

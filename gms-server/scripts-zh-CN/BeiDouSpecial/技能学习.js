@@ -5,6 +5,21 @@ var OldTitle = "#eBeiDou技能学习中心#n\r\n";
 var status = -1;
 var lastSkillInfo = null;
 var resultType = "";
+var needCostConfirm = false;
+
+// ========== 技能学习消耗配置（可自由调整）==========
+var costItemId = 4310000;
+var cost4111006ItemQty = 50;
+var cost4111006Meso = 1000000000;
+var cost4111006Cash = 100000;
+var cost2101002ItemQty = 30;
+var cost2101002Meso = 500000000;
+var cost2101002Cash = 100000;
+
+var skillCosts = {
+    4111006: { itemId: costItemId, itemQty: cost4111006ItemQty, meso: cost4111006Meso, cash: cost4111006Cash },
+    2101002: { itemId: costItemId, itemQty: cost2101002ItemQty, meso: cost2101002Meso, cash: cost2101002Cash }
+};
 
 function start() {
     action(1, 0, 0)
@@ -25,24 +40,35 @@ function action(mode, type, selection) {
     } else if (status === 1) {
         handleSkillSelection(selection);
     } else if (status === 2) {
+        if (needCostConfirm) {
+            handleCostConfirmation();
+        } else {
+            handleResultSelection(selection);
+        }
+    } else if (status === 3) {
         handleResultSelection(selection);
     }
+}
+
+function formatMeso(amount) {
+    if (amount >= 100000000) {
+        return (amount / 100000000).toFixed(1) + "亿";
+    } else if (amount >= 10000) {
+        return (amount / 10000).toFixed(0) + "万";
+    }
+    return amount.toString();
 }
 
 function showSkillList() {
     var player = cm.getPlayer();
     
-    // 检查玩家技能状态
     var hasDoubleJump = player.getSkillLevel(4111006) > 0;
     var hasTeleport = player.getSkillLevel(2101002) > 0;
     
     var text = OldTitle;
-    text += "点击技能自动完成：#n\r\n\r\n";
-    text += "1. 学习技能（未学会时）\r\n";
-    text += "2. 绑定到指定按键\r\n\r\n";
     text += "#b════════════════#k\r\n\r\n";
+    text += "选择要学习的技能：#n\r\n\r\n";
     
-    // 根据技能状态显示不同的文本
     if (hasDoubleJump) {
         text += "#L0##b#s4111006# #q4111006##k (已学会，重新绑定#e-#n键)#l\r\n\r\n";
     } else {
@@ -93,13 +119,52 @@ function handleSkillSelection(selection) {
         keySymbol: keySymbol
     };
     
-    // 处理技能学习和绑定
-    var result = processSkill(skillId, keyCode, skillName, keyName, keySymbol);
+    var player = cm.getPlayer();
+    var hasSkill = player.getSkillLevel(skillId) > 0;
     
-    // 记录结果类型
+    if (hasSkill) {
+        // 已学会，直接重新绑定（不收费）
+        needCostConfirm = false;
+        var result = processSkill(skillId, keyCode, skillName, keyName, keySymbol);
+        resultType = result.success ? "success" : "fail";
+        showResult(result);
+    } else {
+        // 未学会，先显示消耗确认
+        needCostConfirm = true;
+        showCostConfirmation(skillId, skillName);
+    }
+}
+
+function showCostConfirmation(skillId, skillName) {
+    var cost = skillCosts[skillId];
+    var itemName = "#z" + cost.itemId + "#";
+    
+    var text = OldTitle;
+    text += "#b════════════════#k\r\n\r\n";
+    text += "确定要学习 " + skillName + " 吗？\r\n\r\n";
+    text += "#i" + cost.itemId + "# " + itemName + " x" + cost.itemQty + "\r\n";
+    text += "#i4031138# 金币 " + formatMeso(cost.meso) + "\r\n";
+    text += "#fUI/CashShop.img/CashItem/0#  点券 " + cost.cash + "\r\n\r\n";
+    text += "确认后将立即扣除以上消耗。";
+    
+    cm.sendYesNo(text);
+}
+
+function handleCostConfirmation() {
+    if (lastSkillInfo === null) {
+        status = 0;
+        showSkillList();
+        return;
+    }
+    
+    var result = processSkill(
+        lastSkillInfo.skillId,
+        lastSkillInfo.keyCode,
+        lastSkillInfo.skillName,
+        lastSkillInfo.keyName,
+        lastSkillInfo.keySymbol
+    );
     resultType = result.success ? "success" : "fail";
-    
-    // 显示结果
     showResult(result);
 }
 
@@ -167,6 +232,57 @@ function handleResultSelection(selection) {
     }
 }
 
+// 直接写入数据库（绕过 saveCharToDB，防止其失败导致数据丢失）
+function directSaveToDB(skillId, keyCode) {
+    try {
+        var DatabaseConnection = Java.type('org.gms.util.DatabaseConnection');
+        var con = DatabaseConnection.getConnection();
+        try {
+            // 保存技能到 skills 表
+            var psSkill = con.prepareStatement("REPLACE INTO skills (characterid, skillid, skilllevel, masterlevel, expiration) VALUES (?, ?, ?, ?, -1)");
+            try {
+                psSkill.setInt(1, cm.getPlayer().getId());
+                psSkill.setInt(2, skillId);
+                psSkill.setInt(3, 20);
+                psSkill.setInt(4, 20);
+                psSkill.executeUpdate();
+            } finally {
+                psSkill.close();
+            }
+            
+            // 保存键位到 keymap 表（先删旧键位再插入）
+            var psDelKey = con.prepareStatement("DELETE FROM keymap WHERE characterid = ? AND `key` = ?");
+            try {
+                psDelKey.setInt(1, cm.getPlayer().getId());
+                psDelKey.setInt(2, keyCode);
+                psDelKey.executeUpdate();
+            } finally {
+                psDelKey.close();
+            }
+            var psKey = con.prepareStatement("INSERT INTO keymap (characterid, `key`, `type`, `action`) VALUES (?, ?, 1, ?)");
+            try {
+                psKey.setInt(1, cm.getPlayer().getId());
+                psKey.setInt(2, keyCode);
+                psKey.setInt(3, skillId);
+                psKey.executeUpdate();
+            } finally {
+                psKey.close();
+            }
+            
+            cm.getPlayer().dropMessage("DB直写成功");
+            return true;
+        } catch (e) {
+            cm.getPlayer().dropMessage("DB直写出错：" + e.toString());
+            return false;
+        } finally {
+            con.close();
+        }
+    } catch (e) {
+        cm.getPlayer().dropMessage("DB连接出错：" + e.toString());
+        return false;
+    }
+}
+
 // 处理技能学习和绑定的主函数
 function processSkill(skillId, keyCode, skillName, keyName, keySymbol) {
     var player = cm.getPlayer();
@@ -178,13 +294,23 @@ function processSkill(skillId, keyCode, skillName, keyName, keySymbol) {
     var hasSkill = player.getSkillLevel(skillId) > 0;
     
     if (!hasSkill) {
-        // 学习技能 - 直接学习，跳过职业检查
-        var learnResult = learnSkill(skillId, skillName);
-        if (learnResult.success) {
-            messages.push(learnResult.message);
-        } else {
-            messages.push("#r学习失败：" + learnResult.message + "#k");
+        // 检查消耗是否足够
+        var costCheck = checkAndDeductCost(skillId);
+        if (!costCheck.success) {
+            messages.push("#r" + costCheck.message + "#k");
             success = false;
+        } else {
+            // 学习技能 - 直接学习，跳过职业检查
+            var learnResult = learnSkill(skillId, skillName);
+            if (learnResult.success) {
+                if (costCheck.consumed) {
+                    messages.push(costCheck.message);
+                }
+                messages.push(learnResult.message);
+            } else {
+                messages.push("#r学习失败：" + learnResult.message + "#k");
+                success = false;
+            }
         }
     } else {
         messages.push("#g已学会" + skillName + "。#k");
@@ -202,9 +328,84 @@ function processSkill(skillId, keyCode, skillName, keyName, keySymbol) {
         }
     }
     
+    // 直接写入数据库（保证数据持久化，独立于 saveCharToDB）
+    if (success) {
+        directSaveToDB(skillId, keyCode);
+    }
+    
+    // 立即发送键位表到客户端，确保客户端知道这个绑定
+    if (success) {
+        try {
+            player.sendKeymap();
+        } catch (e) {
+            // ignore
+        }
+    }
+    
+    // 同时调用官方保存接口作为补充
+    if (success) {
+        try {
+            player.saveCharToDB(true);
+        } catch (e) {
+            messages.push("#r官方保存失败（已用直写保证数据）：" + e.toString() + "#k");
+        }
+    }
+    
     return {
         success: success,
         message: messages.join("\r\n\r\n")
+    };
+}
+
+// 检查并扣除学习消耗
+function checkAndDeductCost(skillId) {
+    var cost = skillCosts[skillId];
+    if (!cost) {
+        return {success: true, consumed: false, message: ""};
+    }
+    
+    var itemName = "#z" + cost.itemId + "#";
+    
+    // 先检查金币是否足够
+    if (cm.getMeso() < cost.meso) {
+        return {
+            success: false,
+            consumed: false,
+            message: "金币不足！需要 " + formatMeso(cost.meso) + " 金币，请准备后再来。"
+        };
+    }
+    
+    // 再检查物品是否足够
+    if (!cm.haveItem(cost.itemId, cost.itemQty)) {
+        return {
+            success: false,
+            consumed: false,
+            message: "材料不足！需要 " + itemName + " x" + cost.itemQty + "，请准备后再来。"
+        };
+    }
+    
+    // 检查点券是否足够
+    if (cm.getPlayer().getCashShop().getCash(1) < cost.cash) {
+        return {
+            success: false,
+            consumed: false,
+            message: "点券不足！需要 " + cost.cash + " 点券，请准备后再来。"
+        };
+    }
+    
+    // 扣除物品、金币和点券
+    cm.gainItem(cost.itemId, -cost.itemQty);
+    cm.gainMeso(-cost.meso);
+    cm.getPlayer().getCashShop().gainCash(1, -cost.cash);
+    
+    var parts = ["#g消耗：" + itemName + " x" + cost.itemQty + "，" + formatMeso(cost.meso) + " 金币"];
+    if (cost.cash > 0) {
+        parts.push(cost.cash + " 点券");
+    }
+    return {
+        success: true,
+        consumed: true,
+        message: parts.join("，") + "#k"
     };
 }
 
@@ -237,6 +438,9 @@ function learnSkill(skillId, skillName) {
         
         // 直接学习技能，不检查职业限制
         player.changeSkillLevel(skill, maxLevel, maxLevel, -1);
+        
+        // 立即持久化技能到数据库（双重保障）
+        player.saveCharToDB(true);
         
         return {
             success: true, 
