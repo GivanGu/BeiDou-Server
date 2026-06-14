@@ -269,16 +269,16 @@ function directSaveToDB(skillId, keyCode) {
                 psKey.close();
             }
             
-            cm.getPlayer().dropMessage("DB直写成功");
+            // cm.getPlayer().dropMessage("DB直写成功");
             return true;
         } catch (e) {
-            cm.getPlayer().dropMessage("DB直写出错：" + e.toString());
+            // cm.getPlayer().dropMessage("DB直写出错：" + e.toString());
             return false;
         } finally {
             con.close();
         }
     } catch (e) {
-        cm.getPlayer().dropMessage("DB连接出错：" + e.toString());
+        // cm.getPlayer().dropMessage("DB连接出错：" + e.toString());
         return false;
     }
 }
