@@ -33,8 +33,8 @@ function action(mode, type, selection)
 			else
 			{
 				// 生成随机数量
-				mesoQty = 999999;  // 金币
-				cashQty = 30000;  // 点券
+				mesoQty = 500000;  // 金币
+				cashQty = 20000;  // 点券
 
 				cm.sendAcceptDecline("您确定要领取新手礼包吗？一个角色#r限领一次。#k\n\n\r\n"
 					+ "获得奖励：\n"

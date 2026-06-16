@@ -1,5 +1,6 @@
 services:
   beidou-server:
+    container_name: beidou-server
     image: beidou-server:my-nightly
     build:
       context: .
@@ -8,7 +9,7 @@ services:
       TZ: Asia/Shanghai
     ports:
       # Web 由nginx路由
-      # - "8686:8686" 
+      # - "22803:8686" 
       # Login server
       - "22800:22800"
       # Channels.
@@ -24,13 +25,13 @@ services:
       - --gms.service.lan-host=192.168.31.4
       - --gms.service.localhost=192.168.31.4
       #  如果前端访问失败，可以尝试修改↓
-      # - --app.vue=beidou-ui:8686
+      - --app.vue=beidou-ui:8686
       #  !!! 生产环境务必自行生成密钥(可以使用以下指令来生成) , 并关闭 swagger !!!
       #  powershell:  -join ((1..10) | ForEach { '{0:x2}' -f (Get-Random -Maximum 256) })
       #  bash      :  openssl rand -hex 10
-      # - --jwt.secret=4a256297-616b-7786-652f-fd3988c39bb7
-      # - --springdoc.api-docs.enabled=true
-      # - --springdoc.swagger-ui.enabled=true
+      - --jwt.secret=4a256297-616b-7786-662f-fd3988c39bb7
+      - --springdoc.api-docs.enabled=true
+      - --springdoc.swagger-ui.enabled=true
     healthcheck:
       test: ["CMD", "sh", "-c", "netstat -tunlp | grep 0.0.0.0:22800 || exit 1"]
       interval: 10s
@@ -42,7 +43,8 @@ services:
     networks:
       - beidou-network
 
-  beidou-ui:
+  beidou-ui:    
+    container_name: beidou-ui
     image: beidou-ui:my-nightly
     build:
       context: .
