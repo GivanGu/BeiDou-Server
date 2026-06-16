@@ -7,7 +7,7 @@
 !.github/ISSUE_TEMPLATE/
 !.github/workflows/
 .vscode
-
+logs/
 # build files
 /build/
 /dist/
